@@ -3,17 +3,63 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+from sqlalchemy.sql.functions import func, user
 from app.home import blueprint
 from flask import render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from app import login_manager
 from jinja2 import TemplateNotFound
+from app.base.models import User, Media, MediaLog, MediaType, db
+from sqlalchemy.sql import text
 
 @blueprint.route('/index')
 @login_required
 def index():
 
-    return render_template('index.html', segment='index')
+    # Get Dashboard info
+    mediaRentList = MediaLog.query.join(Media, MediaLog.mediaid == Media.id).add_columns(Media.mediatype, Media.medianame, MediaLog.mediarenter, MediaLog.mediarenttime)
+    print(mediaRentList)
+    mediaCountList = [];
+    with db.engine.connect() as connection:
+        result = connection.execute(text("""SELECT
+                                                t2.mediatype,
+                                                IFNULL( t1.count, 0 ) as count
+                                            FROM
+                                                MediaType t2
+                                                LEFT JOIN ( SELECT Count( * ) AS count, mediatype FROM Media GROUP BY mediatype ) t1 ON t2.mediatype = t1.mediatype"""))
+        for row in result:
+            mediaCountList.append(row)
+
+    userList = User.query.all()
+    mediaList = Media.query.all()
+    mediaRentList = Media.query.filter_by(mediastatus=2).all()
+    mediaTypeList = MediaType.query.all()
+
+    dashinfo = {
+        "user_count":len(userList),
+        "media_count":len(mediaList),
+        "media_rented_count":len(mediaRentList),
+        "media_rented": mediaRentList,
+        "media_type_list": mediaTypeList,
+        "media_count_list": mediaCountList
+    }
+    return render_template('index.html', segment='index', dashinfo=dashinfo)
+
+@blueprint.route('/Medias')
+def medias():
+
+    mediaRentList = Media.query.filter_by(mediastatus=2).all()
+    mediaLeftList = Media.query.filter_by(mediastatus=1).all()
+    mediaList = Media.query.all()
+    mediasinfo = {
+        "media_count":len(Media.query.all()),
+        "media_rented_count":len(Media.query.filter_by(mediastatus=2).all()),
+        "media_rented": mediaRentList,
+        "media_left": mediaLeftList,
+        "media_list": mediaList
+    }
+    return render_template('medias.html', segment='Medias', mediasinfo=mediasinfo)
+    
 
 @blueprint.route('/<template>')
 @login_required
@@ -26,7 +72,7 @@ def route_template(template):
 
         # Detect the current page
         segment = get_segment( request )
-
+        
         # Serve the file (if exists) from app/templates/FILE.html
         return render_template( template, segment=segment )
 

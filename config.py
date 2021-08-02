@@ -5,6 +5,9 @@ Copyright (c) 2019 - present AppSeed.us
 
 import os
 from   decouple import config
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text
 
 class Config(object):
 

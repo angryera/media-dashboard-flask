@@ -1,0 +1,75 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Medias {% endblock title %}
+
+{% block content %}
+
+  <div class="header bg-primary pb-6">
+    <div class="container-fluid">
+      <div class="header-body">
+        <div class="row align-items-center py-4">
+          <div class="col-lg-6 col-7">
+            <h6 class="h2 text-white d-inline-block mb-0">Medias</h6>
+            <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+              <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
+                <li class="breadcrumb-item"><a href="#">Medias</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Medias</li>
+              </ol>
+            </nav>
+          </div>
+          <div class="col-lg-6 col-5 text-right">
+            <a href="#" class="btn btn-sm btn-neutral">All Medias</a>
+            <a href="#" class="btn btn-sm btn-neutral">Left Medias</a>
+            <a href="#" class="btn btn-sm btn-neutral">Lent Medias</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page content -->
+  <div class="container-fluid mt--6">
+    <div class="row">
+        <div class="row">
+            {% for media in mediasinfo["media_list"] %}
+                <div class="col-lg-3">
+                    <!-- Image-Text card -->
+                    <div class="card">
+                        <!-- Card image -->
+                        <div class="card-img-top icon-card">
+                            {% if media["mediastatus"] == 2%}
+                                <i class="ni ni-check-bold text-primary icon-card-check" data-toggle="tooltip" data-placement="bottom" title="{{media["mediarenter"]}} Borrowed this."></i>
+                            {% endif %}
+
+                            {% if media["mediatype"] == "TV Series Box Sets" %}
+                                <i class="ni ni-box-2 text-primary icon-card-icon"></i>
+                            {% else %}
+                                {% if media["mediatype"] == "Video Games" %}
+                                <i class="ni ni-controller text-primary icon-card-icon"></i>
+                                {% else %}
+                                <i class="ni ni-tv-2 text-primary icon-card-icon"></i>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <!-- Card body -->
+                        <div class="card-body">
+                            <h5 class="h2 card-title mb-0">{{ media["medianame"] }}</h5>
+                            <small class="text-muted">{{ media["mediaadded"] }}</small>
+                            <p class="card-text mt-4" data-nsfw-filter-status="swf">{{media["mediadescription"]}}</p>
+                            <a href="#!" class="btn btn-link px-0" data-nsfw-filter-status="swf">View article</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include "includes/footer.html" %}
+
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

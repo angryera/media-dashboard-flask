@@ -1,0 +1,17 @@
+.icon-card {
+    position: relative;
+    text-align: center;
+    padding: 60px;
+}
+
+.icon-card-icon {
+    font-size: 150px
+}
+
+.icon-card-check {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    font-size: 75px;
+    color: rgb(45, 206, 137)!important;
+}
