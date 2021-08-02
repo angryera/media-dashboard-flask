@@ -22,7 +22,7 @@ class Config(object):
 
 class ProductionConfig(Config):
     DEBUG = False
-
+    
     # Security
     SESSION_COOKIE_HTTPONLY  = True
     REMEMBER_COOKIE_HTTPONLY = True
@@ -46,3 +46,5 @@ config_dict = {
     'Production': ProductionConfig,
     'Debug'     : DebugConfig
 }
+
+Admin = "admin"

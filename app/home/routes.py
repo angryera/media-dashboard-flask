@@ -11,39 +11,43 @@ from app import login_manager
 from jinja2 import TemplateNotFound
 from app.base.models import User, Media, MediaLog, MediaType, db
 from sqlalchemy.sql import text
+from config import Admin, ProductionConfig
 
 @blueprint.route('/index')
 @login_required
 def index():
+    if(current_user.username == Admin) :
+        # Get Dashboard info
+        mediaRentList = MediaLog.query.join(Media, MediaLog.mediaid == Media.id).add_columns(Media.mediatype, Media.medianame, MediaLog.mediarenter, MediaLog.mediarenttime)
+        mediaCountList = [];
+        with db.engine.connect() as connection:
+            result = connection.execute(text("""SELECT
+                                                    t2.mediatype,
+                                                    IFNULL( t1.count, 0 ) as count
+                                                FROM
+                                                    MediaType t2
+                                                    LEFT JOIN ( SELECT Count( * ) AS count, mediatype FROM Media GROUP BY mediatype ) t1 ON t2.mediatype = t1.mediatype"""))
+            for row in result:
+                mediaCountList.append(row)
 
-    # Get Dashboard info
-    mediaRentList = MediaLog.query.join(Media, MediaLog.mediaid == Media.id).add_columns(Media.mediatype, Media.medianame, MediaLog.mediarenter, MediaLog.mediarenttime)
-    print(mediaRentList)
-    mediaCountList = [];
-    with db.engine.connect() as connection:
-        result = connection.execute(text("""SELECT
-                                                t2.mediatype,
-                                                IFNULL( t1.count, 0 ) as count
-                                            FROM
-                                                MediaType t2
-                                                LEFT JOIN ( SELECT Count( * ) AS count, mediatype FROM Media GROUP BY mediatype ) t1 ON t2.mediatype = t1.mediatype"""))
-        for row in result:
-            mediaCountList.append(row)
+        userList = User.query.all()
+        mediaList = Media.query.all()
+        mediaRentList = Media.query.filter_by(mediastatus=2).all()
+        mediaTypeList = MediaType.query.all()
 
-    userList = User.query.all()
-    mediaList = Media.query.all()
-    mediaRentList = Media.query.filter_by(mediastatus=2).all()
-    mediaTypeList = MediaType.query.all()
+        dashinfo = {
+            "user_count":len(userList),
+            "media_count":len(mediaList),
+            "media_rented_count":len(mediaRentList),
+            "media_rented": mediaRentList,
+            "media_type_list": mediaTypeList,
+            "media_count_list": mediaCountList
+        }
+        print(dashinfo)
+        return render_template('index.html', segment='index', dashinfo=dashinfo, admin=True)
+    else :
+         return redirect(url_for('home_blueprint.medias'), code=302)
 
-    dashinfo = {
-        "user_count":len(userList),
-        "media_count":len(mediaList),
-        "media_rented_count":len(mediaRentList),
-        "media_rented": mediaRentList,
-        "media_type_list": mediaTypeList,
-        "media_count_list": mediaCountList
-    }
-    return render_template('index.html', segment='index', dashinfo=dashinfo)
 
 @blueprint.route('/Medias')
 def medias():
@@ -58,8 +62,17 @@ def medias():
         "media_left": mediaLeftList,
         "media_list": mediaList
     }
-    return render_template('medias.html', segment='Medias', mediasinfo=mediasinfo)
+    return render_template('medias.html', segment='Medias', mediasinfo=mediasinfo, admin=(current_user.username == Admin))
     
+@blueprint.route('/media_admin/check', methods=['POST'])
+def admin_check():
+    json = request.form["mediaId"]
+    print(json)
+    media = Media.query.filter_by(id=json).first()
+    media.mediastatus = 1
+    media.mediarenter = ""
+    db.session.commit()
+    return "SUCCESS"
 
 @blueprint.route('/<template>')
 @login_required

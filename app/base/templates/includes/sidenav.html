@@ -11,13 +11,15 @@
       <div class="collapse navbar-collapse" id="sidenav-collapse-main">
         <!-- Nav items -->
         <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/">
-              <i class="ni ni-tv-2 text-primary"></i>
-              <span class="nav-link-text">Dashboard</span>
-            </a>
-          </li>
-
+          {% if admin == True  %}
+            <li class="nav-item">
+              <a class="nav-link {% if 'index' in segment %} active {% endif %}" href="/">
+                <i class="ni ni-tv-2 text-primary"></i>
+                  <span class="nav-link-text">Dashboard</span>
+              </a>
+            </li>
+          {% endif %}
+  
           <li class="nav-item">
             <a class="nav-link {% if 'Medias' in segment %} active {% endif %}" href="/Medias">
               <i class="ni ni-folder-17 text-primary"></i>

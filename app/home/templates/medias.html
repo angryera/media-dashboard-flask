@@ -8,20 +8,20 @@
     <div class="container-fluid">
       <div class="header-body">
         <div class="row align-items-center py-4">
-          <div class="col-lg-6 col-7">
+          <div class="col-lg-6 col-4">
             <h6 class="h2 text-white d-inline-block mb-0">Medias</h6>
             <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
               <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
                 <li class="breadcrumb-item"><a href="#"><i class="fas fa-home"></i></a></li>
                 <li class="breadcrumb-item"><a href="#">Medias</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Medias</li>
+                <li class="breadcrumb-item active" aria-current="page">All Medias</li>
               </ol>
             </nav>
           </div>
-          <div class="col-lg-6 col-5 text-right">
-            <a href="#" class="btn btn-sm btn-neutral">All Medias</a>
-            <a href="#" class="btn btn-sm btn-neutral">Left Medias</a>
-            <a href="#" class="btn btn-sm btn-neutral">Lent Medias</a>
+          <div class=" col-lg-6 col-8 text-right">
+            <a href="#" class="btn btn-sm btn-neutral" onclick="showAllMedias()">All Medias</a>
+            <a href="#" class="btn btn-sm btn-neutral" onclick="showLeftMedias()">Left Medias</a>
+            <a href="#" class="btn btn-sm btn-neutral" onclick="showLentMedias()">Lent Medias</a>
           </div>
         </div>
       </div>
@@ -30,16 +30,19 @@
   
   <!-- Page content -->
   <div class="container-fluid mt--6">
-    <div class="row">
         <div class="row">
             {% for media in mediasinfo["media_list"] %}
-                <div class="col-lg-3">
+                {% if media["mediastatus"] == 2%}
+                    <div class="col-xl-3 col-lg-4 col-md-6  icon-card-container" type = "lent" id="carddiv{{ media.id }}">
+                {% else %}
+                    <div class="col-xl-3 col-lg-4 col-md-6 icon-card-container" type = "left" id="carddiv{{ media.id }}">
+                {% endif %}
                     <!-- Image-Text card -->
                     <div class="card">
                         <!-- Card image -->
-                        <div class="card-img-top icon-card">
-                            {% if media["mediastatus"] == 2%}
-                                <i class="ni ni-check-bold text-primary icon-card-check" data-toggle="tooltip" data-placement="bottom" title="{{media["mediarenter"]}} Borrowed this."></i>
+                        <div class="card-img-top icon-card" id="card{{ media.id }}">
+                            {% if media["mediastatus"] == 1 %}
+                                <i class="ni ni-check-bold text-primary icon-card-check"></i>
                             {% endif %}
 
                             {% if media["mediatype"] == "TV Series Box Sets" %}
@@ -57,13 +60,62 @@
                             <h5 class="h2 card-title mb-0">{{ media["medianame"] }}</h5>
                             <small class="text-muted">{{ media["mediaadded"] }}</small>
                             <p class="card-text mt-4" data-nsfw-filter-status="swf">{{media["mediadescription"]}}</p>
-                            <a href="#!" class="btn btn-link px-0" data-nsfw-filter-status="swf">View article</a>
+
+                            {% if admin == True %}
+                                {% if media["mediastatus"] == 2 %}
+                                    <button type="button" class="btn btn-success admin_media_check" mediaId="{{media.id}}" data-toggle="notify" data-placement="top" data-align="center" data-type="info" data-icon="ni ni-bell-55"><i class="fa fa-check" aria-hidden="true"></i></button>                                
+                                {% else %}                                
+                                    <button type="button" class="btn btn-success admin_media_check" mediaId="{{media.id}}" disabled><i class="fa fa-check" aria-hidden="true"></i></button>                                
+                                {% endif %}
+                                <button type="button" class="btn btn-primary admin_media_update" data-toggle="modal" data-target="#exampleModal" mediaId="{{media.id}}"><i class="fa fa-edit" aria-hidden="true"></i></button>
+                                <button type="button" class="btn btn-danger admin_media_remove"  mediaId="{{media.id}}"><i class="fa fa-trash" aria-hidden="true"></i></i></button>
+                            {% else %}
+                                {% if media["mediastatus"] == 1 %}  
+                                    <button type="button" class="btn btn-danger">Borrow</button>
+                                {% else %}
+                                    <button type="button" class="btn btn-danger" disabled>Borrow</button>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Edit Media Info</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="exampleFormControlInput1">Media Title</label>
+                                                <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="exampleFormControlSelect1">Select Media Type</label>
+                                                <select class="form-control" id="exampleFormControlSelect1">
+                                                    <option>Video Games</option>
+                                                    <option>Movies</option>
+                                                    <option>TV Series Box Sets</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary">Save changes</button>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
-    </div>
 
     {% include "includes/footer.html" %}
 
@@ -72,4 +124,53 @@
 {% endblock content %}
 
 <!-- Specific JS goes HERE --> 
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+    <script>
+        function showAllMedias() {
+            $("[type='left']").show();
+            $("[type='lent']").show();
+            $(".breadcrumb-item.active").text("All Medias");
+        }
+
+        function showLeftMedias() {
+            $("[type='left']").show();
+            $("[type='lent']").hide();
+            $(".breadcrumb-item.active").text("Left Medias");
+        }
+
+        function showLentMedias() {
+            $("[type='left']").hide();
+            $("[type='lent']").show();
+            $(".breadcrumb-item.active").text("Lent Medias");
+        }
+    </script>
+
+    {% if admin == True %}
+        <script>
+            var origin = window.location.origin;
+            $(document).ready(function() {
+                $(".admin_media_check").click(function() {
+                    var mediaId = $(this).attr("mediaId");
+                    var button = $(this);
+                    $.post(origin + "/media_admin/check", { "mediaId": mediaId }, function(res, err) {
+                        if(res == "SUCCESS") {
+                            button.prop("disabled", true);
+                            $("#card" + mediaId).append(' <i class="ni ni-check-bold text-primary icon-card-check"></i>');
+                             $.notify('You got the media back...', {
+                                allow_dismiss: true,
+                                showProgressbar: true
+                            });
+                            $("#carddiv" + mediaId).attr("type", "left");
+                        }
+                    });
+                });
+
+                $(".admin_media_update").click(function() {
+                    var mediaId = $(this).attr("mediaId");
+                    var button = $(this);
+                    
+                });
+            });
+        </script>
+    {% endif %}
+{% endblock javascripts %}

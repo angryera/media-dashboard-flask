@@ -79,7 +79,7 @@ class MediaType(db.Model):
             setattr(self, property, value)
 
     def __repr__(self):
-        return str(self.mediarenter)
+        return str(self.mediatype)
 
 class MediaLog(db.Model):
     __tablename__ = "MediaLog"
